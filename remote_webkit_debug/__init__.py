@@ -2,7 +2,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
-import httplib2
+from urllib.request import urlopen
 import websocket
 
 __version__ = (0, 0, 1)
@@ -13,9 +13,12 @@ class ChromeShell(object):
         self.port = port
 
     def get_tabs(self):
-        headers, content = httplib2.Http().request('http://{0}:{1}/json'.format(
-                self.host, self.port))
-        return json.loads(content)
+        with  urlopen('http://{0}:{1}/json'.format(
+                self.host, self.port)) as response:
+            content = response.read().decode(
+                encoding=response.headers.get_content_charset())
+            return json.loads(
+                content)
 
     def pick_tab(self, tab_info):
         ws_url = tab_info['webSocketDebuggerUrl']
